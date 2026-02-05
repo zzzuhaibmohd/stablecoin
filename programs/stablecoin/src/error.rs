@@ -6,4 +6,6 @@ pub enum StablecoinError {
     InvalidPrice,
     #[msg("Health factor is too low")]
     HealthFactorTooLow,
+    #[msg("Health factor is too high")]
+    AboveMinimumHealthFactor,
 }
