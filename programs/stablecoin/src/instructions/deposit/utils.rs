@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
 
-use crate::constants::*;
+use crate::constants::SEED_MINT_ACCOUNT;
 use anchor_spl::token::{mint_to, MintTo};
 use anchor_spl::token_interface::{Mint, Token2022, TokenAccount};
 

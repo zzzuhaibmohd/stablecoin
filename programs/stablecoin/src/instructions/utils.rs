@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 
-use crate::error::*;
+use crate::error::StablecoinError;
 use crate::{
     constants::{MAXIMUM_AGE, PRICE_FEED_ADJUSTMENT_FACTOR, PRICE_FEED_ID},
     CollateralState, Config,
@@ -32,9 +32,9 @@ pub fn calculate_health_factor(
 
     let collateral_adjusted_for_liquidation_threshold = (collateral_value_in_usd as u128)
         .checked_mul(config.liquidation_threshold as u128)
-        .unwrap()
+        .ok_or(StablecoinError::ArithmeticError)?
         .checked_div(100)
-        .unwrap();
+        .ok_or(StablecoinError::ArithmeticError)?;
 
     if collateral.tokens_minted == 0 {
         msg!("Health factor is infinite because no tokens minted");
@@ -43,7 +43,7 @@ pub fn calculate_health_factor(
 
     let health_factor = collateral_adjusted_for_liquidation_threshold
         .checked_div(collateral.tokens_minted as u128)
-        .unwrap();
+        .ok_or(StablecoinError::ArithmeticError)?;
     Ok(health_factor as u64)
 }
 
@@ -58,9 +58,9 @@ pub fn get_usd_value(amount_in_lamports: &u64, price_feed: &Account<PriceUpdateV
 
     let amount_in_usd = (*amount_in_lamports as u128)
         .checked_mul(price_in_usd)
-        .unwrap()
+        .ok_or(StablecoinError::ArithmeticError)?
         .checked_div(LAMPORTS_PER_SOL as u128)
-        .unwrap();
+        .ok_or(StablecoinError::ArithmeticError)?;
 
     Ok(amount_in_usd as u64)
 }
@@ -79,9 +79,9 @@ pub fn get_lamports_from_usd(
 
     let amount_in_lamports = (*amount_in_usd as u128)
         .checked_mul(LAMPORTS_PER_SOL as u128)
-        .unwrap()
+        .ok_or(StablecoinError::ArithmeticError)?
         .checked_div(price_in_usd)
-        .unwrap();
+        .ok_or(StablecoinError::ArithmeticError)?;
 
     Ok(amount_in_lamports as u64)
 }

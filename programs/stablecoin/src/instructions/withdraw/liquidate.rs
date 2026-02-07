@@ -1,12 +1,11 @@
 use anchor_lang::prelude::*;
 use pyth_solana_receiver_sdk::price_update::PriceUpdateV2;
 
-use crate::constants::*;
-use crate::error::*;
+use crate::constants::SEED_CONFIG_ACCOUNT;
+use crate::error::StablecoinError;
 use crate::instructions::utils::{calculate_health_factor, get_lamports_from_usd};
 use crate::instructions::withdraw::{burn_tokens, withdraw_collateral};
 use crate::{CollateralState, Config};
-use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token_interface::{Mint, Token2022, TokenAccount};
 
 #[derive(Accounts)]
@@ -64,11 +63,13 @@ pub fn process_liquidate(ctx: Context<Liquidate>, amount_to_burn: u64) -> Result
 
     let liquidation_bonus = lamports
         .checked_mul(ctx.accounts.config.liquidation_bonus)
-        .unwrap()
+        .ok_or(StablecoinError::ArithmeticError)?
         .checked_div(100)
-        .unwrap();
+        .ok_or(StablecoinError::ArithmeticError)?;
 
-    let amount_to_liquidate = lamports.checked_add(liquidation_bonus).unwrap();
+    let amount_to_liquidate = lamports
+        .checked_add(liquidation_bonus)
+        .ok_or(StablecoinError::ArithmeticError)?;
 
     withdraw_collateral(
         &ctx.accounts.liquidator.key(),
@@ -92,8 +93,8 @@ pub fn process_liquidate(ctx: Context<Liquidate>, amount_to_burn: u64) -> Result
     collateral_account.lamport_balance = ctx.accounts.sol_account.lamports();
     collateral_account.tokens_minted = collateral_account
         .tokens_minted
-        .checked_add(amount_to_burn)
-        .unwrap();
+        .checked_sub(amount_to_burn)
+        .ok_or(StablecoinError::ArithmeticError)?;
 
     calculate_health_factor(
         collateral_account,

@@ -8,4 +8,8 @@ pub enum StablecoinError {
     HealthFactorTooLow,
     #[msg("Health factor is too high")]
     AboveMinimumHealthFactor,
+    #[msg("Unauthorized")]
+    Unauthorized,
+    #[msg("Arithmetic overflow or underflow")]
+    ArithmeticError,
 }

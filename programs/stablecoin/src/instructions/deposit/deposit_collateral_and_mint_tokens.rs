@@ -1,8 +1,9 @@
 use anchor_lang::prelude::*;
 
-use crate::constants::*;
+use crate::constants::{SEED_COLLATERAL_ACCOUNT, SEED_CONFIG_ACCOUNT, SEED_SOL_ACCOUNT};
+use crate::error::StablecoinError;
 use crate::instructions::deposit::{deposit_collateral, mint_tokens};
-use crate::instructions::utils::{calculate_health_factor, check_health_factor};
+use crate::instructions::utils::check_health_factor;
 use crate::{CollateralState, Config};
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token_interface::{Mint, Token2022, TokenAccount};
@@ -67,11 +68,11 @@ pub fn process_deposit_collateral_and_mint_tokens(
         .sol_account
         .lamports()
         .checked_add(amount_collateral)
-        .unwrap();
+        .ok_or(StablecoinError::ArithmeticError)?;
     collateral_account.tokens_minted = collateral_account
         .tokens_minted
         .checked_add(amount_to_mint)
-        .unwrap();
+        .ok_or(StablecoinError::ArithmeticError)?;
 
     if !collateral_account.is_initialized {
         collateral_account.is_initialized = true;

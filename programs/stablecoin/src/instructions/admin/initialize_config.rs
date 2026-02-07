@@ -2,7 +2,10 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
 use anchor_spl::token_interface::Token2022;
 
-use crate::constants::*;
+use crate::constants::{
+    LIQUIDATION_BONUS, LIQUIDATION_THRESHOLD, MINT_DECIMALS, MIN_HEALTH_FACTOR,
+    SEED_CONFIG_ACCOUNT, SEED_MINT_ACCOUNT,
+};
 use crate::Config;
 
 #[derive(Accounts)]

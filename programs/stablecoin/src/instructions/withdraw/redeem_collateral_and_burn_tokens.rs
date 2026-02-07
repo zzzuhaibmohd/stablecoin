@@ -1,7 +1,8 @@
 use anchor_lang::prelude::*;
 use pyth_solana_receiver_sdk::price_update::PriceUpdateV2;
 
-use crate::constants::*;
+use crate::constants::{SEED_COLLATERAL_ACCOUNT, SEED_CONFIG_ACCOUNT};
+use crate::error::StablecoinError;
 use crate::instructions::utils::check_health_factor;
 use crate::instructions::withdraw::{burn_tokens, withdraw_collateral};
 use crate::{CollateralState, Config};
@@ -55,11 +56,11 @@ pub fn process_redeem_collateral_and_burn_tokens(
         .sol_account
         .lamports()
         .checked_sub(amount_collateral)
-        .unwrap();
+        .ok_or(StablecoinError::ArithmeticError)?;
     collateral_account.tokens_minted = collateral_account
         .tokens_minted
         .checked_sub(amount_to_burn)
-        .unwrap();
+        .ok_or(StablecoinError::ArithmeticError)?;
 
     check_health_factor(
         collateral_account,

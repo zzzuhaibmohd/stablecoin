@@ -1,4 +1,4 @@
-use crate::constants::*;
+use crate::constants::SEED_SOL_ACCOUNT;
 use anchor_lang::prelude::*;
 use anchor_lang::system_program::{transfer, Transfer};
 use anchor_spl::token_interface::{burn, Burn, Mint, Token2022, TokenAccount};

@@ -1,10 +1,14 @@
 use anchor_lang::prelude::*;
 
-use crate::constants::*;
+use crate::constants::SEED_CONFIG_ACCOUNT;
+use crate::error::StablecoinError;
 use crate::Config;
 
 #[derive(Accounts)]
 pub struct UpdateConfig<'info> {
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
     #[account(
         mut,
         seeds = [SEED_CONFIG_ACCOUNT],
@@ -14,6 +18,11 @@ pub struct UpdateConfig<'info> {
 }
 
 pub fn process_update_config(ctx: Context<UpdateConfig>, min_health_factor: u64) -> Result<()> {
+    require!(
+        ctx.accounts.authority.key() == ctx.accounts.config.authority,
+        StablecoinError::Unauthorized
+    );
+
     let config_account = &mut ctx.accounts.config;
 
     config_account.min_health_factor = min_health_factor;
